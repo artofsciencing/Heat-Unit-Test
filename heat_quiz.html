@@ -1,0 +1,1440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Heat & Thermal Dynamics · Thulir Academy</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --f1:#FF4500;--f2:#FF8C00;--f3:#FFD700;--ember:#FF6B35;
+  --dk:#0D0500;--dk2:#160900;--dk3:#221100;--dk4:#2E1800;
+  --card:rgba(255,100,0,.07);--cb:rgba(255,140,0,.2);
+  --txt:#FFF3E0;--txt2:#FFCC80;--txt3:#FF8F40;
+  --grn:#00E676;--red:#FF5252;--blu:#40C4FF;--pur:#CE93D8;
+  --r:14px;--r2:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{
+  background:var(--dk);color:var(--txt);
+  font-family:'Nunito',sans-serif;min-height:100vh;overflow-x:hidden;
+  user-select:none;-webkit-user-select:none;
+}
+textarea,input{user-select:text;-webkit-user-select:text;}
+canvas#bg{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;}
+.wrap{position:relative;z-index:1;}
+
+/* ── HEADER ── */
+.hdr{background:linear-gradient(135deg,#150600,#2a1000,#150600);
+  border-bottom:2px solid var(--f2);padding:12px 20px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  position:sticky;top:0;z-index:200;box-shadow:0 4px 24px rgba(255,100,0,.35);flex-wrap:wrap;}
+.brand{font-family:'Fredoka One';font-size:1.4rem;color:var(--f3);letter-spacing:.5px;}
+.brand span{color:var(--f1);}
+.hdr-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.badge{background:var(--dk4);border:1px solid var(--cb);border-radius:20px;
+  padding:3px 12px;font-size:.78rem;font-weight:800;color:var(--f3);}
+#timer-box{background:linear-gradient(90deg,#2a0000,#150600);border:2px solid var(--f1);
+  border-radius:20px;padding:4px 16px;font-family:'Fredoka One';font-size:1.05rem;
+  color:var(--f3);min-width:86px;text-align:center;transition:all .3s;}
+#timer-box.warn{border-color:var(--red);color:var(--red);animation:pulse .8s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.student-tag{font-family:'Fredoka One';color:var(--ember);font-size:.9rem;
+  background:var(--dk4);border:1px solid var(--cb);border-radius:20px;padding:3px 14px;}
+
+/* ── XP BAR ── */
+.xp-strip{background:var(--dk2);padding:6px 20px;display:flex;gap:12px;
+  align-items:center;border-bottom:1px solid rgba(255,140,0,.12);}
+.xp-lbl{font-family:'Fredoka One';color:var(--f2);font-size:.85rem;white-space:nowrap;}
+.xp-wrap{flex:1;background:#1a0800;border-radius:20px;height:11px;border:1px solid rgba(255,140,0,.2);overflow:hidden;}
+.xp-fill{height:100%;border-radius:20px;background:linear-gradient(90deg,var(--f1),var(--f3));
+  transition:width .5s ease;width:0%;}
+.xp-num{font-family:'Fredoka One';color:var(--f3);font-size:.85rem;white-space:nowrap;}
+#lvl-tag{background:linear-gradient(90deg,var(--f1),var(--f2));border-radius:20px;
+  padding:2px 12px;font-family:'Fredoka One';font-size:.82rem;color:var(--dk);}
+
+/* ── SCREENS ── */
+.screen{display:none;max-width:860px;margin:0 auto;padding:28px 18px 70px;}
+.screen.active{display:block;}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:11px 26px;border-radius:30px;
+  border:none;cursor:pointer;font-family:'Fredoka One';font-size:.95rem;
+  letter-spacing:.3px;transition:all .2s;text-decoration:none;}
+.btn-fire{background:linear-gradient(90deg,var(--f1),var(--f2));color:var(--dk);}
+.btn-fire:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(255,100,0,.5);}
+.btn-out{background:transparent;border:2px solid var(--f2);color:var(--f2);}
+.btn-out:hover{background:rgba(255,140,0,.1);}
+.btn-ghost{background:rgba(255,255,255,.06);color:var(--txt2);border:1px solid var(--cb);}
+.btn-ghost:hover{background:rgba(255,255,255,.12);}
+.btn-sm{padding:8px 18px;font-size:.85rem;}
+.btn-blue{background:rgba(64,196,255,.12);border:1.5px solid var(--blu);color:var(--blu);}
+.btn-blue:hover{background:rgba(64,196,255,.22);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important;}
+
+/* ── CARD ── */
+.card{background:var(--card);border:1px solid var(--cb);border-radius:var(--r);padding:22px;margin-bottom:16px;}
+.card-hd{background:linear-gradient(135deg,rgba(255,69,0,.14),rgba(255,200,0,.05));
+  border:1px solid var(--cb);border-radius:var(--r);padding:18px 22px;margin-bottom:22px;
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
+.card-hd h2{font-family:'Fredoka One';font-size:1.35rem;color:var(--f3);}
+.card-hd p{font-size:.84rem;color:var(--txt2);margin-top:3px;}
+
+/* ── LOGIN ── */
+#screen-login{max-width:520px;}
+.login-hero{text-align:center;padding:36px 20px 28px;
+  background:linear-gradient(135deg,rgba(255,69,0,.12),rgba(255,200,0,.06));
+  border:1px solid var(--cb);border-radius:22px;margin-bottom:24px;}
+.login-hero .icon{font-size:4rem;display:block;margin-bottom:10px;}
+.login-hero h1{font-family:'Fredoka One';font-size:1.9rem;color:var(--f3);line-height:1.2;}
+.login-hero p{color:var(--txt2);font-size:.9rem;margin-top:6px;}
+.form-group{margin-bottom:18px;}
+.form-group label{display:block;font-weight:800;color:var(--f2);font-size:.88rem;margin-bottom:8px;letter-spacing:.3px;}
+.form-group select,.form-group input[type=text],.form-group input[type=email]{
+  width:100%;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,140,0,.25);
+  border-radius:var(--r2);padding:11px 16px;color:var(--txt);
+  font-family:'Nunito';font-size:.95rem;outline:none;appearance:none;-webkit-appearance:none;}
+.form-group select:focus,.form-group input:focus{
+  border-color:var(--f2);box-shadow:0 0 0 3px rgba(255,140,0,.15);}
+.form-group select option{background:#1a0800;color:var(--txt);}
+.teacher-link{text-align:center;margin-top:20px;}
+.teacher-link button{background:none;border:none;color:rgba(255,140,0,.35);
+  font-size:.75rem;cursor:pointer;font-family:'Nunito';transition:color .2s;letter-spacing:.5px;}
+.teacher-link button:hover{color:rgba(255,140,0,.7);}
+
+/* ── TEACHER LOGIN ── */
+#screen-teacher-login{max-width:480px;}
+.t-login-hero{text-align:center;padding:30px 20px 22px;
+  background:linear-gradient(135deg,rgba(64,100,196,.1),rgba(100,64,196,.06));
+  border:1px solid rgba(100,140,255,.2);border-radius:22px;margin-bottom:24px;}
+.t-login-hero h1{font-family:'Fredoka One';font-size:1.7rem;color:#90CAF9;}
+.t-login-hero p{color:#90A4AE;font-size:.88rem;margin-top:6px;}
+.form-group.teacher input{border-color:rgba(100,140,255,.3);}
+.form-group.teacher input:focus{border-color:#90CAF9;box-shadow:0 0 0 3px rgba(100,140,255,.15);}
+.btn-teacher{background:linear-gradient(90deg,#1565C0,#283593);color:#E3F2FD;
+  border:none;border-radius:30px;padding:11px 28px;font-family:'Fredoka One';
+  font-size:.95rem;cursor:pointer;transition:all .2s;}
+.btn-teacher:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(40,80,200,.4);}
+
+/* ── TEACHER DASHBOARD ── */
+#screen-teacher-dash{max-width:1100px;}
+.t-dash-hdr{background:linear-gradient(135deg,#0a1020,#0d1830);
+  border:1px solid rgba(100,149,237,.25);border-radius:var(--r);
+  padding:20px 26px;margin-bottom:20px;display:flex;justify-content:space-between;
+  align-items:center;flex-wrap:wrap;gap:12px;}
+.t-dash-hdr h2{font-family:'Fredoka One';font-size:1.5rem;color:#90CAF9;}
+.t-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:20px;}
+.t-stat{background:rgba(100,149,237,.07);border:1px solid rgba(100,149,237,.18);
+  border-radius:var(--r);padding:16px;text-align:center;}
+.t-stat .v{font-family:'Fredoka One';font-size:1.8rem;color:#90CAF9;}
+.t-stat .l{font-size:.78rem;color:#78909C;margin-top:3px;}
+.t-filter{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center;}
+.t-filter select{background:rgba(255,255,255,.05);border:1px solid rgba(100,149,237,.2);
+  border-radius:20px;padding:6px 14px;color:#B0BEC5;font-family:'Nunito';font-size:.85rem;outline:none;}
+.t-table{width:100%;border-collapse:collapse;font-size:.85rem;}
+.t-table th{background:rgba(100,149,237,.12);color:#90CAF9;font-family:'Fredoka One';
+  font-weight:400;padding:10px 14px;text-align:left;border-bottom:1px solid rgba(100,149,237,.2);}
+.t-table td{padding:9px 14px;border-bottom:1px solid rgba(255,255,255,.05);
+  color:#CFD8DC;vertical-align:middle;}
+.t-table tr:hover td{background:rgba(100,149,237,.06);}
+.t-table tr.terminated td{opacity:.65;}
+.score-chip{display:inline-block;padding:2px 10px;border-radius:20px;
+  font-family:'DM Mono';font-size:.8rem;font-weight:500;}
+.score-chip.high{background:rgba(0,230,118,.15);color:var(--grn);}
+.score-chip.mid{background:rgba(255,200,0,.12);color:var(--f3);}
+.score-chip.low{background:rgba(255,82,82,.12);color:var(--red);}
+.detail-toggle{background:rgba(100,149,237,.1);border:1px solid rgba(100,149,237,.25);
+  border-radius:8px;padding:3px 10px;color:#90CAF9;font-size:.78rem;cursor:pointer;
+  font-family:'Nunito';transition:all .2s;}
+.detail-toggle:hover{background:rgba(100,149,237,.2);}
+.detail-row{display:none;background:rgba(13,18,32,.6);}
+.detail-row.open{display:table-row;}
+.detail-cell{padding:16px 20px;border-bottom:1px solid rgba(100,149,237,.12);}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+@media(max-width:600px){.detail-grid{grid-template-columns:1fr;}}
+.detail-item{background:rgba(255,255,255,.03);border-radius:8px;padding:10px 14px;}
+.detail-item .di-label{font-size:.75rem;color:#78909C;margin-bottom:4px;}
+.detail-item .di-ans{font-size:.85rem;color:#CFD8DC;line-height:1.5;}
+.di-score{float:right;font-family:'DM Mono';font-size:.85rem;color:var(--f3);}
+.term-badge{background:rgba(255,82,82,.15);color:var(--red);border:1px solid rgba(255,82,82,.3);
+  border-radius:20px;padding:1px 8px;font-size:.72rem;font-weight:800;}
+
+/* ── INTRO ── */
+.intro-hero{text-align:center;padding:36px 20px;
+  background:linear-gradient(135deg,rgba(255,69,0,.12),rgba(255,200,0,.06));
+  border:1px solid var(--cb);border-radius:22px;margin-bottom:24px;}
+.intro-hero .big{font-size:4.5rem;display:block;margin-bottom:12px;}
+.intro-hero h1{font-family:'Fredoka One';font-size:2rem;color:var(--f3);line-height:1.2;}
+.intro-hero p{color:var(--txt2);font-size:.92rem;margin-top:6px;}
+.info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:22px;}
+.info-card{background:var(--card);border:1px solid var(--cb);border-radius:var(--r);padding:16px;text-align:center;}
+.info-card .v{font-family:'Fredoka One';font-size:1.7rem;color:var(--f2);}
+.info-card .l{font-size:.78rem;color:var(--txt2);margin-top:3px;}
+.sec-list{background:var(--card);border:1px solid var(--cb);border-radius:var(--r);padding:18px;margin-bottom:22px;}
+.sec-list h3{font-family:'Fredoka One';color:var(--f2);margin-bottom:12px;font-size:1rem;}
+.sec-row{display:flex;align-items:center;gap:10px;padding:7px 0;
+  border-bottom:1px solid rgba(255,140,0,.08);}
+.sec-row:last-child{border:none;}
+.sec-dot{width:8px;height:8px;border-radius:50%;background:var(--f1);flex-shrink:0;}
+.sec-nm{flex:1;font-weight:700;font-size:.88rem;}
+.sec-mk{color:var(--f3);font-family:'Fredoka One';font-size:.9rem;}
+.tip{background:rgba(64,196,255,.06);border:1px solid rgba(64,196,255,.2);
+  border-radius:var(--r2);padding:12px 16px;margin-bottom:22px;font-size:.86rem;
+  color:#B3E5FC;display:flex;gap:8px;align-items:flex-start;line-height:1.5;}
+.tip .ti{flex-shrink:0;}
+
+/* ── MCQ ── */
+.q-card{background:var(--card);border:1px solid var(--cb);border-radius:var(--r);
+  padding:20px;margin-bottom:14px;transition:border-color .2s;}
+.q-card:hover{border-color:rgba(255,140,0,.35);}
+.q-num{font-family:'Fredoka One';color:var(--txt3);font-size:.82rem;margin-bottom:6px;}
+.q-txt{font-size:.98rem;font-weight:800;color:var(--txt);line-height:1.5;margin-bottom:14px;}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+@media(max-width:500px){.opts{grid-template-columns:1fr;}}
+.opt{background:rgba(255,255,255,.04);border:1.5px solid rgba(255,140,0,.14);
+  border-radius:var(--r2);padding:10px 14px;cursor:pointer;
+  display:flex;align-items:center;gap:9px;font-size:.9rem;transition:all .16s;}
+.opt:hover{border-color:var(--f2);background:rgba(255,140,0,.08);}
+.opt.sel{border-color:var(--f2);background:rgba(255,140,0,.14);}
+.opt.correct{border-color:var(--grn);background:rgba(0,230,118,.1);}
+.opt.wrong{border-color:var(--red);background:rgba(255,82,82,.1);}
+.opt.show-correct{border-color:var(--grn);background:rgba(0,230,118,.06);}
+.opt-l{width:24px;height:24px;border-radius:50%;border:1.5px solid rgba(255,140,0,.3);
+  display:flex;align-items:center;justify-content:center;font-family:'Fredoka One';
+  font-size:.76rem;color:var(--f2);flex-shrink:0;}
+.opt.sel .opt-l{background:var(--f2);color:var(--dk);border-color:var(--f2);}
+
+/* ── FILL BLANKS ── */
+.blank-card{background:var(--card);border:1px solid var(--cb);border-radius:var(--r);padding:20px;margin-bottom:14px;}
+.blank-sentence{font-size:.96rem;font-weight:700;color:var(--txt);line-height:2.2;margin-bottom:10px;word-break:break-word;}
+.blank-inp-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;}
+.blank-inp{background:rgba(255,255,255,.06);border:1.5px solid rgba(255,140,0,.22);
+  border-radius:var(--r2);padding:8px 13px;color:var(--txt);
+  font-family:'Nunito';font-size:.9rem;min-width:140px;flex:1;outline:none;}
+.blank-inp:focus{border-color:var(--f2);box-shadow:0 0 0 3px rgba(255,140,0,.14);}
+.blank-inp.correct{border-color:var(--grn);background:rgba(0,230,118,.09);}
+.blank-inp.wrong{border-color:var(--red);background:rgba(255,82,82,.09);}
+.blank-fb{font-size:.82rem;margin-top:7px;display:none;line-height:1.5;}
+
+/* ── SA / LA ── */
+.sa-card{background:var(--card);border:1px solid var(--cb);border-radius:var(--r);padding:20px;margin-bottom:14px;}
+.sa-marks{float:right;font-family:'Fredoka One';color:var(--f3);font-size:.88rem;
+  background:rgba(255,200,0,.1);border:1px solid rgba(255,200,0,.2);border-radius:20px;
+  padding:2px 12px;margin-left:10px;}
+.sa-txt{font-size:.96rem;font-weight:800;color:var(--txt);line-height:1.5;margin-bottom:12px;clear:both;}
+.sa-area{width:100%;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,140,0,.18);
+  border-radius:var(--r2);padding:11px 14px;color:var(--txt);
+  font-family:'Nunito';font-size:.9rem;resize:vertical;min-height:75px;outline:none;}
+.sa-area:focus{border-color:var(--f2);box-shadow:0 0 0 3px rgba(255,140,0,.12);}
+.sa-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center;}
+.ai-btn{display:inline-flex;align-items:center;gap:7px;padding:8px 18px;border-radius:20px;
+  border:1.5px solid var(--blu);background:rgba(64,196,255,.07);color:var(--blu);
+  font-family:'Fredoka One';font-size:.83rem;cursor:pointer;transition:all .2s;}
+.ai-btn:hover{background:rgba(64,196,255,.17);}
+.ai-btn:disabled{opacity:.4;cursor:not-allowed;}
+.model-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:20px;
+  border:1px solid var(--cb);background:transparent;color:var(--txt2);
+  font-family:'Fredoka One';font-size:.82rem;cursor:pointer;transition:all .2s;}
+.model-btn:hover{background:rgba(255,255,255,.06);}
+.sa-score-badge{display:none;font-family:'Fredoka One';font-size:.85rem;color:var(--f3);
+  background:rgba(255,140,0,.12);border-radius:20px;padding:3px 12px;}
+.sa-fb{background:rgba(0,0,0,.3);border-left:3px solid var(--f2);border-radius:0 8px 8px 0;
+  padding:11px 14px;margin-top:10px;font-size:.87rem;line-height:1.6;display:none;}
+.sa-fb.show{display:block;}
+.sa-fb .fb-good{color:var(--grn);}
+.sa-fb .fb-miss{color:#FFAB40;}
+.model-ans{background:rgba(255,200,0,.05);border:1px solid rgba(255,200,0,.15);
+  border-radius:var(--r2);padding:13px 16px;margin-top:10px;
+  font-size:.85rem;color:var(--txt2);line-height:1.6;display:none;}
+.model-ans.show{display:block;}
+.model-ans strong{color:var(--f3);}
+.spinner{display:inline-block;width:13px;height:13px;
+  border:2px solid rgba(64,196,255,.3);border-top-color:var(--blu);
+  border-radius:50%;animation:spin .65s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── RESULTS ── */
+.res-hero{text-align:center;padding:36px 20px;
+  background:linear-gradient(135deg,rgba(255,69,0,.12),rgba(255,200,0,.06));
+  border:1px solid var(--cb);border-radius:22px;margin-bottom:24px;}
+.grade-wrap{width:128px;height:128px;border-radius:50%;margin:0 auto 18px;
+  position:relative;display:flex;align-items:center;justify-content:center;}
+.grade-wrap canvas{position:absolute;top:0;left:0;}
+.grade-txt{position:relative;text-align:center;}
+.grade-num{font-family:'Fredoka One';font-size:2.2rem;color:var(--f3);}
+.grade-sub{font-size:.75rem;color:var(--txt2);}
+.res-hero h2{font-family:'Fredoka One';font-size:1.8rem;color:var(--f3);}
+.res-hero p{color:var(--txt2);margin-top:6px;}
+.scores-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:22px;}
+.sc-card{background:var(--card);border:1px solid var(--cb);border-radius:var(--r);padding:16px;text-align:center;}
+.sc-card .sv{font-family:'Fredoka One';font-size:1.8rem;}
+.sc-card .sl{font-size:.76rem;color:var(--txt2);margin-top:3px;}
+.sc-card.hi{border-color:var(--f2);background:rgba(255,140,0,.08);}
+.review-blk{background:var(--card);border:1px solid var(--cb);border-radius:var(--r);padding:20px;margin-bottom:16px;}
+.review-blk h3{font-family:'Fredoka One';color:var(--f2);margin-bottom:12px;font-size:1rem;}
+.rr{display:flex;align-items:flex-start;gap:9px;padding:7px 0;
+  border-bottom:1px solid rgba(255,140,0,.07);font-size:.86rem;}
+.rr:last-child{border:none;}
+.rr-q{flex:1;color:var(--txt2);}
+.rr-a{font-weight:700;}
+.rr-ok{color:var(--grn);}
+.rr-bad{color:var(--red);}
+
+/* ── NAV BAR ── */
+.nav-bar{display:flex;justify-content:space-between;align-items:center;
+  margin-top:24px;flex-wrap:wrap;gap:12px;}
+.nav-info{color:var(--txt2);font-size:.86rem;}
+
+/* ── OVERLAYS ── */
+.overlay{position:fixed;inset:0;z-index:900;display:flex;align-items:center;
+  justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;}
+.overlay.show{opacity:1;pointer-events:all;}
+.overlay-bg{position:absolute;inset:0;background:rgba(0,0,0,.87);}
+.overlay-box{position:relative;text-align:center;padding:40px 30px;max-width:440px;
+  background:var(--dk3);border:2px solid var(--cb);border-radius:22px;margin:16px;}
+
+/* WARNING */
+#ov-warn .overlay-box{border-color:rgba(255,200,0,.5);}
+#ov-warn .icon{font-size:4rem;display:block;margin-bottom:12px;animation:shake .4s ease;}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+#ov-warn h2{font-family:'Fredoka One';font-size:1.8rem;color:var(--f3);}
+#ov-warn p{color:var(--txt2);margin-top:8px;font-size:.9rem;line-height:1.5;}
+#warn-count{font-family:'DM Mono';font-size:1.1rem;color:var(--red);margin-top:10px;font-weight:700;}
+
+/* TERMINATED */
+#ov-term .overlay-box{border-color:rgba(255,82,82,.5);}
+#ov-term .icon{font-size:4rem;display:block;margin-bottom:12px;}
+#ov-term h2{font-family:'Fredoka One';font-size:1.8rem;color:var(--red);}
+#ov-term p{color:var(--txt2);margin-top:8px;font-size:.9rem;line-height:1.5;}
+
+/* LEVELUP */
+#ov-lvl .overlay-box{border-color:rgba(255,200,0,.6);}
+#ov-lvl .icon{font-size:5rem;display:block;margin-bottom:12px;
+  animation:bounce 1s ease infinite alternate;}
+@keyframes bounce{to{transform:translateY(-10px)}}
+#ov-lvl h2{font-family:'Fredoka One';font-size:2.2rem;
+  background:linear-gradient(90deg,var(--f1),var(--f3));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+#ov-lvl p{color:var(--txt2);margin:8px 0 16px;}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(70px);
+  background:var(--dk4);border:1.5px solid var(--f2);border-radius:30px;
+  padding:9px 22px;font-family:'Fredoka One';color:var(--f3);font-size:.9rem;
+  z-index:999;transition:transform .3s,opacity .3s;opacity:0;white-space:nowrap;}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+
+/* ── PRINT ── */
+@media print{
+  canvas#bg,#ov-warn,#ov-term,#ov-lvl,#toast,.hdr,.xp-strip,.nav-bar,
+  .ai-btn,.model-btn{display:none!important;}
+  body{background:#fff;color:#000;}
+  .card,.blank-card,.sa-card,.q-card,.res-hero,.review-blk{border:1px solid #ccc;background:#fff;}
+}
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+<div class="wrap">
+
+<!-- HEADER (always visible) -->
+<div class="hdr" id="main-hdr">
+  <div class="brand">🔥 Thulir <span>Academy</span></div>
+  <div class="hdr-right">
+    <div class="badge" id="hdr-badge" style="display:none">Science · Heat</div>
+    <div class="student-tag" id="hdr-student" style="display:none"></div>
+    <div id="timer-box" style="display:none">1:30:00</div>
+  </div>
+</div>
+<div class="xp-strip" id="xp-strip" style="display:none">
+  <div class="xp-lbl">🔥 XP</div>
+  <div class="xp-wrap"><div class="xp-fill" id="xp-fill"></div></div>
+  <div class="xp-num"><span id="xp-n">0</span>/500</div>
+  <div id="lvl-tag">Lv 1</div>
+</div>
+
+<!-- ═══ LOGIN ═══ -->
+<div class="screen active" id="screen-login">
+  <div class="login-hero">
+    <span class="icon">🔥</span>
+    <h1>Heat &amp; Thermal Dynamics<br><span style="font-size:.65em;color:var(--txt2)">Unit Test 2 — Thulir Academy</span></h1>
+    <p>Enter your details to begin the test</p>
+  </div>
+  <div class="card">
+    <div class="form-group">
+      <label>👤 Your Name</label>
+      <select id="sel-name">
+        <option value="">— Select your name —</option>
+        <option value="Tesa Leah">Tesa Leah</option>
+        <option value="Jothila Sai">Jothila Sai</option>
+        <option value="Kavipriyan">Kavipriyan</option>
+        <option value="Dheekshan">Dheekshan</option>
+        <option value="Shai Lakshan">Shai Lakshan</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>🏫 Your Class (e.g. 7A, 8B)</label>
+      <input type="text" id="inp-class" placeholder="Enter your class" maxlength="10" autocomplete="off">
+    </div>
+    <div style="text-align:center;margin-top:8px">
+      <button class="btn btn-fire" onclick="studentLogin()">🚀 Start Test</button>
+    </div>
+  </div>
+  <div class="teacher-link">
+    <button onclick="showTeacherLogin()">🔑 Staff Access</button>
+  </div>
+</div>
+
+<!-- ═══ TEACHER LOGIN ═══ -->
+<div class="screen" id="screen-teacher-login">
+  <div class="t-login-hero">
+    <h1>🏫 Staff Portal</h1>
+    <p>Enter your staff credentials to view student reports</p>
+  </div>
+  <div class="card" style="border-color:rgba(100,149,237,.2);">
+    <div class="form-group teacher">
+      <label style="color:#90CAF9">Staff Email</label>
+      <input type="email" id="inp-teacher-email" placeholder="your@thulir.in" autocomplete="off">
+    </div>
+    <div style="text-align:center;margin-top:12px;display:flex;gap:10px;justify-content:center;">
+      <button class="btn-teacher btn" onclick="teacherLogin()">🔐 Access Dashboard</button>
+      <button class="btn btn-ghost btn-sm" onclick="showScreen('login')">← Back</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TEACHER DASHBOARD ═══ -->
+<div class="screen" id="screen-teacher-dash">
+  <div class="t-dash-hdr">
+    <div>
+      <h2>📊 Student Reports Dashboard</h2>
+      <p style="color:#78909C;font-size:.83rem;margin-top:3px">Heat &amp; Thermal Dynamics — Unit Test 2</p>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-ghost btn-sm" onclick="exportCSV()">📥 Export CSV</button>
+      <button class="btn btn-ghost btn-sm" onclick="clearReports()" style="color:var(--red);border-color:rgba(255,82,82,.3)">🗑 Clear All</button>
+      <button class="btn btn-ghost btn-sm" onclick="showScreen('login')">← Logout</button>
+    </div>
+  </div>
+  <div class="t-stats" id="t-stats-grid"></div>
+  <div class="t-filter">
+    <span style="color:#78909C;font-size:.85rem">Filter:</span>
+    <select id="filter-name" onchange="renderDash()">
+      <option value="">All Students</option>
+      <option>Tesa Leah</option><option>Jothila Sai</option>
+      <option>Kavipriyan</option><option>Dheekshan</option><option>Shai Lakshan</option>
+    </select>
+    <select id="filter-status" onchange="renderDash()">
+      <option value="">All Attempts</option>
+      <option value="complete">Completed</option>
+      <option value="terminated">Terminated</option>
+    </select>
+  </div>
+  <div style="overflow-x:auto;border-radius:var(--r);border:1px solid rgba(100,149,237,.15);">
+    <table class="t-table" id="t-table">
+      <thead>
+        <tr>
+          <th>Student</th><th>Class</th><th>Date &amp; Time</th>
+          <th>MCQ/10</th><th>Blanks/5</th><th>SA/15</th><th>LA/20</th>
+          <th>Total/50</th><th>Status</th><th></th>
+        </tr>
+      </thead>
+      <tbody id="t-tbody"></tbody>
+    </table>
+  </div>
+  <p id="no-reports" style="text-align:center;color:#546E7A;padding:30px;display:none">No reports yet. Students haven't taken the test on this device.</p>
+</div>
+
+<!-- ═══ INTRO ═══ -->
+<div class="screen" id="screen-intro">
+  <div class="intro-hero">
+    <span class="big">🔥</span>
+    <h1>Heat &amp; Thermal Dynamics<br><small style="font-size:.6em;color:var(--txt2)">Unit Test 2</small></h1>
+    <p>Conduction · Convection · Radiation · Temperature Scales</p>
+  </div>
+  <div class="info-grid">
+    <div class="info-card"><div class="v">50</div><div class="l">Total Marks</div></div>
+    <div class="info-card"><div class="v">1.5 hrs</div><div class="l">Time Limit</div></div>
+    <div class="info-card"><div class="v">4</div><div class="l">Sections</div></div>
+    <div class="info-card"><div class="v">24</div><div class="l">Questions</div></div>
+  </div>
+  <div class="sec-list">
+    <h3>📋 Test Structure</h3>
+    <div class="sec-row"><div class="sec-dot"></div><div class="sec-nm">Section A — Multiple Choice</div><div class="sec-mk">10 × 1 = 10</div></div>
+    <div class="sec-row"><div class="sec-dot"></div><div class="sec-nm">Section B — Fill in the Blanks</div><div class="sec-mk">5 × 1 = 5</div></div>
+    <div class="sec-row"><div class="sec-dot"></div><div class="sec-nm">Section C — Short Answer</div><div class="sec-mk">5 × 3 = 15</div></div>
+    <div class="sec-row"><div class="sec-dot"></div><div class="sec-nm">Section D — Long Answer</div><div class="sec-mk">4 × 5 = 20</div></div>
+  </div>
+  <div class="tip"><span class="ti">⚠️</span> <span>Don't switch tabs or minimize this window — it will end your test! Sections A &amp; B are auto-marked. Use the <strong>AI Check</strong> button to get feedback on your written answers.</span></div>
+  <div style="text-align:center">
+    <button class="btn btn-fire" onclick="startTest()">🚀 Start Test</button>
+  </div>
+</div>
+
+<!-- ═══ SECTION A ═══ -->
+<div class="screen" id="screen-a">
+  <div class="card-hd">
+    <div><h2>🅰 Section A — Multiple Choice</h2><p>Choose the best answer · 1 mark each</p></div>
+    <div id="mcq-score-disp" style="font-family:'Fredoka One';color:var(--f3);font-size:1.15rem;display:none"></div>
+  </div>
+  <div id="mcq-wrap"></div>
+  <div class="nav-bar">
+    <div class="nav-info" id="mcq-prog">0 / 10 answered</div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-ghost btn-sm" onclick="submitMCQ()" id="btn-sub-mcq">✅ Submit Section A</button>
+      <button class="btn btn-fire btn-sm" onclick="goSec('b')" id="btn-nxt-a" style="display:none">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SECTION B ═══ -->
+<div class="screen" id="screen-b">
+  <div class="card-hd">
+    <div><h2>🅱 Section B — Fill in the Blanks</h2><p>Complete each sentence · 1 mark each</p></div>
+  </div>
+  <div id="blank-wrap"></div>
+  <div class="nav-bar">
+    <button class="btn btn-ghost btn-sm" onclick="goSec('a')">← Back</button>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-ghost btn-sm" onclick="submitBlanks()" id="btn-sub-b">✅ Submit Section B</button>
+      <button class="btn btn-fire btn-sm" onclick="goSec('c')" id="btn-nxt-b" style="display:none">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SECTION C ═══ -->
+<div class="screen" id="screen-c">
+  <div class="card-hd">
+    <div><h2>©️ Section C — Short Answer</h2><p>Answer in 2–4 sentences · 3 marks each</p></div>
+  </div>
+  <div id="sa-wrap"></div>
+  <div class="nav-bar">
+    <button class="btn btn-ghost btn-sm" onclick="goSec('b')">← Back</button>
+    <button class="btn btn-fire btn-sm" onclick="goSec('d')">Next →</button>
+  </div>
+</div>
+
+<!-- ═══ SECTION D ═══ -->
+<div class="screen" id="screen-d">
+  <div class="card-hd">
+    <div><h2>🔡 Section D — Long Answer</h2><p>Detailed answers required · 5 marks each</p></div>
+  </div>
+  <div id="la-wrap"></div>
+  <div class="nav-bar">
+    <button class="btn btn-ghost btn-sm" onclick="goSec('c')">← Back</button>
+    <button class="btn btn-fire" onclick="finishTest()">🏁 Submit &amp; See Results</button>
+  </div>
+</div>
+
+<!-- ═══ RESULTS ═══ -->
+<div class="screen" id="screen-results">
+  <div class="res-hero">
+    <div class="grade-wrap">
+      <canvas id="grade-cv" width="128" height="128"></canvas>
+      <div class="grade-txt">
+        <div class="grade-num" id="g-num">—</div>
+        <div class="grade-sub">Score</div>
+      </div>
+    </div>
+    <h2 id="res-title">Test Complete!</h2>
+    <p id="res-tag"></p>
+  </div>
+  <div class="scores-grid" id="scores-grid"></div>
+  <div id="review-wrap"></div>
+  <div style="text-align:center;margin-top:24px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+    <button class="btn btn-ghost" onclick="window.print()">🖨️ Print</button>
+    <button class="btn btn-fire" onclick="resetAll()">🔄 New Attempt</button>
+  </div>
+</div>
+
+</div><!-- /.wrap -->
+
+<!-- OVERLAYS -->
+<div class="overlay" id="ov-warn">
+  <div class="overlay-bg"></div>
+  <div class="overlay-box">
+    <span class="icon">⚠️</span>
+    <h2>Hey! Come Back!</h2>
+    <p>Don't leave the test window. If you switch tabs or apps again, your test will be ended automatically.</p>
+    <p id="warn-count">Warning 1 of 2</p>
+    <button class="btn btn-fire" style="margin-top:16px" onclick="dismissWarn()">I'm back! 🔥</button>
+  </div>
+</div>
+
+<div class="overlay" id="ov-term">
+  <div class="overlay-bg"></div>
+  <div class="overlay-box">
+    <span class="icon">🚫</span>
+    <h2>Test Ended</h2>
+    <p>You left the test window. Your current progress has been saved and reported to your teacher.</p>
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:18px;flex-wrap:wrap">
+      <button class="btn btn-fire" onclick="viewResults()">See My Results</button>
+      <button class="btn btn-ghost btn-sm" onclick="resetAll()">Try Again</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="ov-lvl">
+  <div class="overlay-bg"></div>
+  <div class="overlay-box">
+    <span class="icon">🏆</span>
+    <h2 id="lu-h">Level Up!</h2>
+    <p id="lu-p">You're heating up!</p>
+    <button class="btn btn-fire" onclick="closeLvl()">Keep Going 🔥</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  ANTI-CHEAT — No right-click, no copy
+// ═══════════════════════════════════════════════
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('copy', e => { if(!isEditableTarget(e.target)) e.preventDefault(); });
+document.addEventListener('cut', e => { if(!isEditableTarget(e.target)) e.preventDefault(); });
+document.addEventListener('keydown', e => {
+  if(!isEditableTarget(e.target)){
+    if((e.ctrlKey||e.metaKey) && ['c','x','u','s','a','p'].includes(e.key.toLowerCase())) e.preventDefault();
+  }
+  if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='u') e.preventDefault();
+});
+function isEditableTarget(t){ return t&&(t.tagName==='TEXTAREA'||t.tagName==='INPUT'||t.isContentEditable); }
+
+// ═══════════════════════════════════════════════
+//  DATA
+// ═══════════════════════════════════════════════
+const TEACHERS = ['gm@thulir.in','ka@thulir.in'];
+
+const MCQ = [
+  {q:"The SI unit of heat energy is:", o:["Kelvin","Joule","Celsius","Calorie"], a:1},
+  {q:"Temperature is a measure of the:", o:["Total kinetic energy","Average kinetic energy","Potential energy","Density"], a:1},
+  {q:"Heat transfer in fluids (liquids and gases) primarily occurs through:", o:["Conduction","Radiation","Convection","Insulation"], a:2},
+  {q:"Which of the following is a poor conductor of heat?", o:["Copper","Wood","Aluminum","Silver"], a:1},
+  {q:"The process of heat transfer from the Sun to the Earth is called:", o:["Convection","Conduction","Radiation","Expansion"], a:2},
+  {q:"A clinical thermometer is designed to measure the temperature of:", o:["Boiling water","The atmosphere","The human body","Ice"], a:2},
+  {q:"Land breeze flows from:", o:["Sea to land at night","Land to sea at night","Sea to land during the day","Land to sea during the day"], a:1},
+  {q:"Materials that do not allow heat to pass through them easily are called:", o:["Conductors","Radiators","Insulators","Converters"], a:2},
+  {q:"The normal temperature of a healthy human body is approximately:", o:["37°C","98.6°C","100°C","0°C"], a:0},
+  {q:"When a solid is heated, its molecules generally:", o:["Move closer","Stop moving","Vibrate faster","Decrease in size"], a:2},
+];
+
+const BLANKS = [
+  {
+    display:"Heat energy always flows from a body at a ___ temperature to a body at a ___ temperature.",
+    n:2,
+    labels:["Blank 1 (first blank)","Blank 2 (second blank)"],
+    correct:[["higher","hotter","hot","high","greater","more"],["lower","cooler","cold","low","lesser","less","cold"]],
+    model:["higher","lower"]
+  },
+  {
+    display:"The instrument used to measure temperature is called a ___.",
+    n:1,
+    labels:["Answer"],
+    correct:[["thermometer","thermometers","a thermometer","clinical thermometer"]],
+    model:["thermometer"]
+  },
+  {
+    display:"___ is the only mode of heat transfer that can occur through a vacuum.",
+    n:1,
+    labels:["Answer"],
+    correct:[["radiation","radiant","radiant heat","thermal radiation","heat radiation"]],
+    model:["Radiation"]
+  },
+  {
+    display:"Stainless steel pans are often provided with copper bottoms because copper is a better ___ of heat.",
+    n:1,
+    labels:["Answer"],
+    correct:[["conductor","good conductor","heat conductor","thermal conductor"]],
+    model:["conductor"]
+  },
+  {
+    display:"Dark-coloured clothes absorb ___ heat than light-coloured clothes.",
+    n:1,
+    labels:["Answer"],
+    correct:[["more","greater amount of","much more","a lot more","extra","most","a greater amount","higher amount"]],
+    model:["more"]
+  },
+];
+
+const SA = [
+  {
+    q:"Define Heat and state its SI unit.",
+    marks:3,
+    keys:["heat is a form of energy / type of energy / thermal energy","flows from hot to cold / hotter to cooler / due to temperature difference / because of temperature","SI unit is joule / unit is joule / measured in joule / joule J / the unit is J"],
+    model:"Heat is a form of energy that transfers between objects due to a difference in temperature. It always flows from a hotter body to a cooler body. The SI unit of heat energy is the Joule (J)."
+  },
+  {
+    q:"Explain the main difference between Heat and Temperature.",
+    marks:3,
+    keys:["heat is total energy / heat is the amount of energy / heat is energy transferred","temperature is average kinetic energy / temperature tells how hot / temperature measures hotness","heat depends on mass / heat depends on amount / one difference between them / temperature does not depend on mass / they are different because"],
+    model:"Heat is the total amount of thermal energy transferred between objects due to temperature difference. Temperature is a measure of the average kinetic energy of the molecules of a substance — it tells us how hot or cold something is. A large pot of warm water may have more heat energy than a small cup of boiling water, even though the cup has a higher temperature."
+  },
+  {
+    q:"Why are the handles of cooking utensils made of wood or plastic?",
+    marks:3,
+    keys:["wood and plastic are poor conductors / bad conductors / insulators / don't conduct heat / heat cannot pass through wood","heat does not travel through handle / stops heat from reaching handle / prevents heat transfer / doesn't let heat reach your hand","prevent burns / protect hand / safe to hold / hand does not get hot / we won't get hurt"],
+    model:"Wood and plastic are poor conductors of heat — they are insulators that don't allow heat to pass through them easily. If handles were made of metal, heat from the hot vessel would conduct through to the handle. Wood and plastic handles stay cool, protecting the user from burns."
+  },
+  {
+    q:"Briefly explain why we wear woolen clothes in winter.",
+    marks:3,
+    keys:["wool is poor conductor / wool is insulator / wool does not conduct heat well","traps air / air pockets / warm air near body / keeps air close","prevents body heat from escaping / keeps us warm / stops heat from leaving body / body heat stays inside"],
+    model:"Wool is a poor conductor of heat, so it does not allow body heat to escape to the cold surroundings. Wool also has tiny air pockets between its fibres that trap warm air close to the body. Together, wool and the trapped air act as insulators, keeping us warm in winter."
+  },
+  {
+    q:"What is a kink in a clinical thermometer, and what is its purpose?",
+    marks:3,
+    keys:["kink is narrow bend / narrow constriction / small break / small curve / narrow part in the tube / near the bulb","mercury cannot fall back / mercury stays in place / prevents mercury from going back / mercury does not go back","reading can be taken after removing / can see temperature after removing from body / reading stays / mercury does not drop"],
+    model:"A kink is a narrow constriction or bend in the glass tube of a clinical thermometer, located just above the bulb. When the thermometer is removed from the patient's body, the kink prevents the mercury from falling back into the bulb. This allows the doctor or nurse to read the temperature at their convenience without the mercury dropping."
+  },
+];
+
+const LA = [
+  {
+    q:"Describe the three modes of heat transfer — Conduction, Convection, and Radiation — with one real-life example for each.",
+    marks:5,
+    keys:[
+      "conduction is heat through contact / solid to solid / molecule to molecule / through touching",
+      "conduction example: spoon in hot water / metal rod gets hot / iron gets hot / handle of pan / any valid conduction example",
+      "convection is through fluid movement / in liquids and gases / warm fluid rises and cool fluid sinks / circular movement",
+      "convection example: boiling water / sea breeze / hot air balloon / room heater / any valid convection example",
+      "radiation does not need medium / can travel through vacuum / electromagnetic waves / from the sun / infrared radiation"
+    ],
+    model:"Conduction: Heat transfer through direct contact, from molecule to molecule. It mainly occurs in solids. Example: A metal spoon placed in hot soup gets hot at the handle end. Convection: Heat transfer through the movement of fluid currents. Warm, less dense fluid rises and cool fluid sinks. Example: When water is heated in a pot, hot water rises and cool water sinks, circulating until all water is hot. Radiation: Heat transfer through electromagnetic waves (infrared) that need no medium. Example: The Sun heats the Earth through the vacuum of space."
+  },
+  {
+    q:"Explain the formation of Sea Breeze and Land Breeze with the help of a simple diagram description.",
+    marks:5,
+    keys:[
+      "sea breeze during the day / daytime",
+      "land heats up faster than sea / land gets hotter during day",
+      "sea breeze blows from sea to land / sea to land direction",
+      "land breeze at night / night time",
+      "land cools faster at night / sea stays warm at night / land breeze blows from land to sea"
+    ],
+    model:"Sea Breeze (Day): During the day, land heats up faster than the sea. The air above the land becomes warm, rises up, and the cooler air from the sea rushes in to take its place — this is the sea breeze (sea → land). Land Breeze (Night): At night, land cools faster than the sea. The air above the sea is now warmer, rises up, and the cooler air from land rushes toward the sea — this is the land breeze (land → sea). Both are formed because hot air rises and cooler air moves in to fill the gap."
+  },
+  {
+    q:"Compare the Celsius and Kelvin scales of temperature. How do you convert a temperature from Celsius to Kelvin?",
+    marks:5,
+    keys:[
+      "celsius scale: 0 degrees is freezing / water freezes at 0 celsius / 100 degrees is boiling",
+      "kelvin scale: 0 kelvin is absolute zero / lowest possible temperature / no negative values in kelvin",
+      "both scales have same size of one degree / one degree celsius equals one kelvin",
+      "formula to convert: K = C + 273 / kelvin equals celsius plus 273 / add 273",
+      "example of conversion: 37 celsius is 310 kelvin / 0 celsius is 273 kelvin / any correct example / kelvin is SI unit"
+    ],
+    model:"Celsius Scale: Sets 0°C as the freezing point of water and 100°C as the boiling point. It is used in everyday life. Kelvin Scale: Starts at Absolute Zero (0 K), the lowest possible temperature. No negative values exist on this scale. It is the SI unit of temperature. Comparison: The size of one degree is identical on both scales. Kelvin has no negative values, making it useful for scientific work. Conversion: K = °C + 273. Example: 37°C (body temperature) = 37 + 273 = 310 K."
+  },
+  {
+    q:"Describe an experiment to show that black surfaces are better absorbers of radiant heat than white surfaces.",
+    marks:5,
+    keys:[
+      "two containers / two cans / two identical vessels — one black, one white",
+      "same amount of water / equal water / same starting temperature / same initial conditions",
+      "placed at same distance from heat source / lamp or light source used",
+      "black container temperature rises faster / higher temperature in black can / observation about black absorbing more",
+      "conclusion: black absorbs more heat / dark surfaces are better absorbers / white reflects more heat"
+    ],
+    model:"Aim: Compare heat absorption by black and white surfaces. Materials: Two identical metal cans — one painted black, one white; two thermometers; a heat lamp; timer. Procedure: Fill both cans with equal water at the same temperature. Place both at equal distances from the heat source. Note temperatures every 2 minutes. Observation: The temperature in the black can rises faster. Conclusion: Black surfaces absorb more radiant heat than white surfaces, as white surfaces reflect most of the heat energy."
+  },
+];
+
+// ═══════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════
+let currentStudent = null; // { name, class }
+let testActive = false;
+let warnCount = 0;
+let timerSec = 90*60, timerInterval = null, timerStarted = false;
+let mcqAnswers = new Array(10).fill(null);
+let mcqDone = false;
+let blankAnswers = [["",""],[""],[""],[""],[""]];
+let blanksDone = false;
+let saAnswers = new Array(5).fill('');
+let saScores = new Array(5).fill(null);
+let laAnswers = new Array(4).fill('');
+let laScores = new Array(4).fill(null);
+let xp = 0, level = 1;
+let wasTerminated = false;
+let testStartTime = null;
+
+const LEVELS = [{n:'Spark',xp:0},{n:'Flame',xp:50},{n:'Ember',xp:120},
+  {n:'Blaze',xp:220},{n:'Inferno',xp:350},{n:'Nova',xp:500}];
+
+// ═══════════════════════════════════════════════
+//  PARTICLES
+// ═══════════════════════════════════════════════
+(function(){
+  const c=document.getElementById('bg'),ctx=c.getContext('2d');
+  let W,H,emb=[];
+  function sz(){W=c.width=window.innerWidth;H=c.height=window.innerHeight;}
+  sz();window.addEventListener('resize',sz);
+  function mk(){return{x:Math.random()*W,y:H+8,vx:(Math.random()-.5)*.7,
+    vy:-(Math.random()*1.3+.4),l:1,s:Math.random()*2.5+1,h:Math.random()*40+8};}
+  function frame(){
+    ctx.clearRect(0,0,W,H);
+    if(Math.random()<.12)emb.push(mk());
+    emb=emb.filter(e=>e.l>0);
+    emb.forEach(e=>{e.x+=e.vx;e.y+=e.vy;e.l-=.007;
+      ctx.beginPath();ctx.arc(e.x,e.y,e.s,0,Math.PI*2);
+      ctx.fillStyle=`hsla(${e.h},100%,60%,${e.l*.35})`;ctx.fill();});
+    requestAnimationFrame(frame);
+  }
+  frame();
+})();
+
+// ═══════════════════════════════════════════════
+//  SCREEN MANAGEMENT
+// ═══════════════════════════════════════════════
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const s=document.getElementById('screen-'+id);
+  if(s)s.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ═══════════════════════════════════════════════
+//  LOGIN
+// ═══════════════════════════════════════════════
+function studentLogin(){
+  const name=document.getElementById('sel-name').value.trim();
+  const cls=document.getElementById('inp-class').value.trim();
+  if(!name){showToast('⚠️ Please select your name!');return;}
+  if(!cls){showToast('⚠️ Please enter your class!');return;}
+  currentStudent={name,class:cls};
+  document.getElementById('hdr-student').textContent='👤 '+name;
+  document.getElementById('hdr-student').style.display='block';
+  document.getElementById('hdr-badge').style.display='block';
+  showScreen('intro');
+}
+function showTeacherLogin(){showScreen('teacher-login');}
+function teacherLogin(){
+  const email=(document.getElementById('inp-teacher-email').value||'').toLowerCase().trim();
+  if(TEACHERS.includes(email)){
+    renderDash();showScreen('teacher-dash');
+    document.getElementById('hdr-badge').style.display='none';
+    document.getElementById('hdr-student').style.display='none';
+    document.getElementById('timer-box').style.display='none';
+    document.getElementById('xp-strip').style.display='none';
+  } else {
+    showToast('❌ Invalid staff credentials.');
+  }
+}
+
+// ═══════════════════════════════════════════════
+//  TEST START
+// ═══════════════════════════════════════════════
+function startTest(){
+  testActive=true;
+  testStartTime=Date.now();
+  wasTerminated=false;
+  buildMCQ();buildBlanks();buildSA();buildLA();
+  document.getElementById('timer-box').style.display='block';
+  document.getElementById('xp-strip').style.display='flex';
+  startTimer();
+  setupFocusGuard();
+  goSec('a');
+}
+function goSec(s){showScreen(s);}
+
+// ═══════════════════════════════════════════════
+//  FOCUS / TAB GUARD
+// ═══════════════════════════════════════════════
+function setupFocusGuard(){
+  document.addEventListener('visibilitychange', onVisChange);
+  window.addEventListener('blur', onBlur);
+}
+function onVisChange(){
+  if(document.hidden && testActive) terminateTest();
+}
+function onBlur(){
+  if(!testActive) return;
+  warnCount++;
+  if(warnCount>=3){ terminateTest(); return; }
+  const ov=document.getElementById('ov-warn');
+  document.getElementById('warn-count').textContent=`Warning ${warnCount} of 2`;
+  ov.classList.add('show');
+}
+function dismissWarn(){
+  document.getElementById('ov-warn').classList.remove('show');
+}
+function terminateTest(){
+  if(!testActive)return;
+  testActive=false;
+  wasTerminated=true;
+  clearInterval(timerInterval);
+  saveReport(true);
+  document.getElementById('ov-warn').classList.remove('show');
+  document.getElementById('ov-term').classList.add('show');
+}
+function viewResults(){
+  document.getElementById('ov-term').classList.remove('show');
+  finishTest(true);
+}
+
+// ═══════════════════════════════════════════════
+//  TIMER
+// ═══════════════════════════════════════════════
+function startTimer(){
+  if(timerStarted)return; timerStarted=true;
+  timerInterval=setInterval(()=>{
+    timerSec--;
+    const h=Math.floor(timerSec/3600),m=Math.floor((timerSec%3600)/60),s=timerSec%60;
+    const tb=document.getElementById('timer-box');
+    tb.textContent=(h?h+':':'')+(m<10&&h?'0':'')+m+':'+(s<10?'0':'')+s;
+    if(timerSec<=600)tb.classList.add('warn');
+    if(timerSec<=0){clearInterval(timerInterval);showToast('⏰ Time is up!');finishTest();}
+  },1000);
+}
+
+// ═══════════════════════════════════════════════
+//  XP / LEVEL
+// ═══════════════════════════════════════════════
+function addXP(amt){
+  const old=getLevel();
+  xp=Math.max(0,xp+amt);
+  const nw=getLevel();
+  document.getElementById('xp-n').textContent=xp;
+  document.getElementById('xp-fill').style.width=Math.min(100,(xp/500)*100)+'%';
+  document.getElementById('lvl-tag').textContent='Lv '+(nw+1)+' '+LEVELS[nw].n;
+  if(nw>old) showLvlUp(LEVELS[nw].n,nw+1);
+}
+function getLevel(){let l=0;for(let i=0;i<LEVELS.length;i++)if(xp>=LEVELS[i].xp)l=i;return l;}
+function showLvlUp(n,num){
+  document.getElementById('lu-h').textContent=`Level ${num}: ${n}!`;
+  document.getElementById('lu-p').textContent='You\'re heating up! 🔥';
+  document.getElementById('ov-lvl').classList.add('show');
+}
+function closeLvl(){document.getElementById('ov-lvl').classList.remove('show');}
+
+// ═══════════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════════
+function showToast(msg,dur=2400){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),dur);
+}
+
+// ═══════════════════════════════════════════════
+//  BUILD MCQ
+// ═══════════════════════════════════════════════
+function buildMCQ(){
+  const w=document.getElementById('mcq-wrap'); w.innerHTML='';
+  MCQ.forEach((q,qi)=>{
+    const d=document.createElement('div'); d.className='q-card'; d.id='qc'+qi;
+    let oi=''; ['A','B','C','D'].forEach((l,i)=>{
+      oi+=`<div class="opt" id="opt${qi}_${i}" onclick="pickMCQ(${qi},${i})">
+        <div class="opt-l">${l}</div><span>${q.o[i]}</span></div>`;
+    });
+    d.innerHTML=`<div class="q-num">Question ${qi+1} of 10</div>
+      <div class="q-txt">${q.q}</div>
+      <div class="opts">${oi}</div>`;
+    w.appendChild(d);
+  });
+}
+function pickMCQ(qi,oi){
+  if(mcqDone)return;
+  if(mcqAnswers[qi]!==null) document.getElementById(`opt${qi}_${mcqAnswers[qi]}`).classList.remove('sel');
+  mcqAnswers[qi]=oi;
+  document.getElementById(`opt${qi}_${oi}`).classList.add('sel');
+  const done=mcqAnswers.filter(a=>a!==null).length;
+  document.getElementById('mcq-prog').textContent=done+' / 10 answered';
+}
+function submitMCQ(){
+  if(mcqAnswers.filter(a=>a!==null).length<10){showToast('⚠️ Please answer all 10 questions!');return;}
+  mcqDone=true;
+  let correct=0;
+  MCQ.forEach((q,qi)=>{
+    const ua=mcqAnswers[qi];
+    if(ua===q.a){correct++;document.getElementById(`opt${qi}_${ua}`).classList.add('correct');}
+    else{
+      document.getElementById(`opt${qi}_${ua}`).classList.add('wrong');
+      document.getElementById(`opt${qi}_${q.a}`).classList.add('show-correct');
+    }
+  });
+  addXP(correct*10);
+  document.getElementById('mcq-score-disp').textContent=`✅ ${correct}/10 correct`;
+  document.getElementById('mcq-score-disp').style.display='block';
+  document.getElementById('btn-sub-mcq').style.display='none';
+  document.getElementById('btn-nxt-a').style.display='flex';
+  showToast(`🔥 ${correct}/10 correct!`);
+}
+
+// ═══════════════════════════════════════════════
+//  BUILD BLANKS
+// ═══════════════════════════════════════════════
+function buildBlanks(){
+  const w=document.getElementById('blank-wrap'); w.innerHTML='';
+  BLANKS.forEach((b,bi)=>{
+    const d=document.createElement('div'); d.className='blank-card';
+    const disp=b.display.replace(/_+/g,'<span style="color:var(--f2);font-weight:900"> ___ </span>');
+    let inps='<div class="blank-inp-row">';
+    b.labels.forEach((_,idx)=>{
+      inps+=`<input class="blank-inp" id="bi_${bi}_${idx}" placeholder="${b.labels[idx]}"
+        oninput="blankAnswers[${bi}][${idx}]=this.value">`;
+    });
+    inps+=`</div><div class="blank-fb" id="bfb_${bi}"></div>`;
+    d.innerHTML=`<div class="q-num">Blank ${bi+1}</div>
+      <div class="blank-sentence">${disp}</div>${inps}`;
+    w.appendChild(d);
+  });
+}
+function submitBlanks(){
+  blanksDone=true;
+  let correct=0;
+  BLANKS.forEach((b,bi)=>{
+    let allOk=true;
+    b.correct.forEach((acc,idx)=>{
+      const val=(blankAnswers[bi][idx]||'').toLowerCase().trim();
+      const ok=acc.some(a=>val===a||val.includes(a)||a.includes(val)&&val.length>2);
+      const inp=document.getElementById(`bi_${bi}_${idx}`);
+      inp.disabled=true;
+      inp.classList.add(ok?'correct':'wrong');
+      if(!ok)allOk=false;
+    });
+    const fb=document.getElementById(`bfb_${bi}`);
+    fb.style.display='block';
+    if(allOk){
+      correct++;
+      fb.style.color='var(--grn)';
+      fb.textContent='✅ Correct! Answer: '+b.model.join(' / ');
+    } else {
+      fb.style.color='var(--red)';
+      fb.textContent='❌ Correct answer: '+b.model.join(' / ');
+    }
+  });
+  addXP(correct*8);
+  document.getElementById('btn-sub-b').style.display='none';
+  document.getElementById('btn-nxt-b').style.display='flex';
+  showToast(`🔥 ${correct}/5 correct in Section B!`);
+}
+
+// ═══════════════════════════════════════════════
+//  BUILD SHORT ANSWER
+// ═══════════════════════════════════════════════
+function buildSA(){
+  const w=document.getElementById('sa-wrap'); w.innerHTML='';
+  SA.forEach((s,si)=>{
+    const d=document.createElement('div'); d.className='sa-card';
+    d.innerHTML=`
+      <div class="q-num">Question ${si+1} of 5 <span class="sa-marks">[${s.marks} marks]</span></div>
+      <div class="sa-txt">${s.q}</div>
+      <textarea class="sa-area" id="sa_${si}" rows="4"
+        placeholder="Write your answer here..."
+        oninput="saAnswers[${si}]=this.value"></textarea>
+      <div class="sa-actions">
+        <button class="ai-btn" id="saib_${si}" onclick="evalSA(${si})">🤖 Check with AI</button>
+        <button class="model-btn" onclick="toggleModel('sma_${si}')">📖 Model Answer</button>
+        <span class="sa-score-badge" id="sasb_${si}">—</span>
+      </div>
+      <div class="sa-fb" id="safb_${si}"></div>
+      <div class="model-ans" id="sma_${si}"><strong>📘 Model Answer:</strong><br>${s.model}</div>`;
+    w.appendChild(d);
+  });
+}
+function toggleModel(id){document.getElementById(id).classList.toggle('show');}
+
+async function evalSA(si){
+  const ans=document.getElementById(`sa_${si}`).value.trim();
+  if(!ans){showToast('✏️ Please write your answer first!');return;}
+  const btn=document.getElementById(`saib_${si}`);
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Checking...';
+  const q=SA[si];
+  const keyList=q.keys.map((k,i)=>`Point ${i+1}: ${k}`).join('\n');
+  const prompt=`You are a kind and encouraging science teacher evaluating a student's answer. The student is 10-12 years old. Be very lenient with spelling mistakes, grammar errors, and simple language. Award marks for any answer that shows the correct concept, even if expressed in simple words.
+
+Question (${q.marks} marks): ${q.q}
+
+You are checking for these ${q.marks} key points — award 1 mark for each point the student has covered:
+${keyList}
+
+Student's answer: "${ans}"
+
+For each point, check if the student has conveyed the concept in any way — don't require exact wording. If a student writes "heat goes from hot to cold" that covers a point about "flows from hotter to cooler body".
+
+Respond ONLY as JSON (no extra text): {"score":N,"feedback":"2-3 sentences of warm encouraging feedback suitable for a 10-12 year old","found":["short phrases of what they got right"],"missing":["short phrases of what was missed, if any"]}`;
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:400,
+        messages:[{role:'user',content:prompt}]})});
+    const data=await r.json();
+    const txt=data.content[0].text.replace(/```json|```/g,'').trim();
+    const res=JSON.parse(txt);
+    saScores[si]=res.score;
+    addXP(res.score*5);
+    const fb=document.getElementById(`safb_${si}`);
+    let html=`<strong style="color:var(--f3)">Score: ${res.score}/${q.marks}</strong><br>${res.feedback}`;
+    if(res.found&&res.found.length) html+=`<br><span class="fb-good">✅ Good: ${res.found.join(', ')}</span>`;
+    if(res.missing&&res.missing.length) html+=`<br><span class="fb-miss">💡 Also include: ${res.missing.join(', ')}</span>`;
+    fb.innerHTML=html; fb.classList.add('show');
+    const sb=document.getElementById(`sasb_${si}`);
+    sb.textContent=`Score: ${res.score}/${q.marks}`;sb.style.display='inline-block';
+    btn.innerHTML='✅ Checked';
+  }catch(e){
+    btn.disabled=false;btn.innerHTML='🤖 Check with AI';
+    showToast('⚠️ AI check failed. Try again.');
+  }
+}
+
+// ═══════════════════════════════════════════════
+//  BUILD LONG ANSWER
+// ═══════════════════════════════════════════════
+function buildLA(){
+  const w=document.getElementById('la-wrap'); w.innerHTML='';
+  LA.forEach((la,li)=>{
+    const d=document.createElement('div'); d.className='sa-card';
+    d.innerHTML=`
+      <div class="q-num">Question ${li+1} of 4 <span class="sa-marks">[${la.marks} marks]</span></div>
+      <div class="sa-txt">${la.q}</div>
+      <textarea class="sa-area" id="la_${li}" rows="7"
+        placeholder="Write your detailed answer here..."
+        oninput="laAnswers[${li}]=this.value"></textarea>
+      <div class="sa-actions">
+        <button class="ai-btn" id="laib_${li}" onclick="evalLA(${li})">🤖 Check with AI</button>
+        <button class="model-btn" onclick="toggleModel('lma_${li}')">📖 Model Answer</button>
+        <span class="sa-score-badge" id="lasb_${li}">—</span>
+      </div>
+      <div class="sa-fb" id="lafb_${li}"></div>
+      <div class="model-ans" id="lma_${li}"><strong>📘 Model Answer:</strong><br>${la.model}</div>`;
+    w.appendChild(d);
+  });
+}
+
+async function evalLA(li){
+  const ans=document.getElementById(`la_${li}`).value.trim();
+  if(!ans){showToast('✏️ Please write your answer first!');return;}
+  const btn=document.getElementById(`laib_${li}`);
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Evaluating...';
+  const la=LA[li];
+  const keyList=la.keys.map((k,i)=>`Point ${i+1}: ${k}`).join('\n');
+  const prompt=`You are a kind and encouraging science teacher evaluating a student's detailed answer. The student is 10-12 years old. Be very lenient with spelling, grammar, and sentence structure. Focus only on whether key concepts are present.
+
+Question (${la.marks} marks): ${la.q}
+
+Award 1 mark for each of these ${la.marks} key points covered (accept simple language and rough descriptions):
+${keyList}
+
+Student's answer: "${ans}"
+
+If the student's answer shows understanding of a concept even with simple words, incorrect spelling, or incomplete sentences, still award the mark for that point.
+
+Respond ONLY as JSON: {"score":N,"feedback":"2-3 sentences of warm encouraging feedback for a 10-12 year old","strengths":"what they covered well (1-2 short phrases)","improvements":"key things they missed (1-2 short phrases, or 'Nothing major!' if score is high)"}`;
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:500,
+        messages:[{role:'user',content:prompt}]})});
+    const data=await r.json();
+    const txt=data.content[0].text.replace(/```json|```/g,'').trim();
+    const res=JSON.parse(txt);
+    laScores[li]=res.score;
+    addXP(res.score*8);
+    const fb=document.getElementById(`lafb_${li}`);
+    fb.innerHTML=`<strong style="color:var(--f3)">Score: ${res.score}/${la.marks}</strong><br>${res.feedback}
+      <br><span class="fb-good">✅ Strengths: ${res.strengths}</span>
+      <br><span class="fb-miss">💡 To improve: ${res.improvements}</span>`;
+    fb.classList.add('show');
+    const sb=document.getElementById(`lasb_${li}`);
+    sb.textContent=`Score: ${res.score}/${la.marks}`;sb.style.display='inline-block';
+    btn.innerHTML='✅ Evaluated';
+  }catch(e){
+    btn.disabled=false;btn.innerHTML='🤖 Check with AI';
+    showToast('⚠️ AI check failed. Try again.');
+  }
+}
+
+// ═══════════════════════════════════════════════
+//  CALCULATE SCORES
+// ═══════════════════════════════════════════════
+function calcMCQ(){
+  if(!mcqDone)return 0;
+  return MCQ.filter((_,i)=>mcqAnswers[i]===MCQ[i].a).length;
+}
+function calcBlanks(){
+  if(!blanksDone)return 0;
+  return BLANKS.reduce((acc,b,bi)=>{
+    let ok=true;
+    b.correct.forEach((acc2,idx)=>{
+      const val=(blankAnswers[bi][idx]||'').toLowerCase().trim();
+      if(!acc2.some(a=>val===a||val.includes(a)||a.includes(val)&&val.length>2))ok=false;
+    });
+    return acc+(ok?1:0);
+  },0);
+}
+function calcSA(){return saScores.reduce((a,s)=>a+(s||0),0);}
+function calcLA(){return laScores.reduce((a,s)=>a+(s||0),0);}
+
+// ═══════════════════════════════════════════════
+//  FINISH TEST
+// ═══════════════════════════════════════════════
+function finishTest(fromTerminate=false){
+  if(!fromTerminate){
+    testActive=false;
+    clearInterval(timerInterval);
+    saveReport(false);
+  }
+  const ms=calcMCQ(),bs=calcBlanks(),ss=calcSA(),ls=calcLA();
+  const total=ms+bs+ss+ls;
+  const pct=Math.round((total/50)*100);
+
+  // Grade ring
+  const cv=document.getElementById('grade-cv'),ctx=cv.getContext('2d');
+  const cx=64,cy=64,r=54,lw=11;
+  ctx.clearRect(0,0,128,128);
+  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
+  ctx.strokeStyle='rgba(255,100,0,.15)';ctx.lineWidth=lw;ctx.stroke();
+  if(pct>0){
+    const angle=(pct/100)*Math.PI*2-Math.PI/2;
+    const g=ctx.createLinearGradient(0,0,128,0);
+    g.addColorStop(0,'#FF4500');g.addColorStop(1,'#FFD700');
+    ctx.beginPath();ctx.arc(cx,cy,r,-Math.PI/2,angle);
+    ctx.strokeStyle=g;ctx.lineWidth=lw;ctx.lineCap='round';ctx.stroke();
+  }
+  document.getElementById('g-num').textContent=`${total}/50`;
+  let title,tag;
+  if(pct>=90){title='🏆 Outstanding!';tag='You\'re a Thermal Genius!';}
+  else if(pct>=75){title='🔥 Excellent!';tag='You\'ve mastered most heat concepts!';}
+  else if(pct>=60){title='👍 Good Job!';tag='Solid work — keep revising!';}
+  else if(pct>=40){title='📚 Keep Practising!';tag='Review the model answers and try again.';}
+  else{title='💪 Don\'t Give Up!';tag='Revisit the chapter — you\'ve got this!';}
+  document.getElementById('res-title').textContent=wasTerminated?'⚠️ Test Terminated':title;
+  document.getElementById('res-tag').textContent=wasTerminated?'Your test was ended because you left the window. Your score has been saved.':tag;
+
+  // Scores grid
+  const sg=document.getElementById('scores-grid');sg.innerHTML='';
+  [{v:`${total}/50`,l:'Total Score',c:'var(--f3)',h:true},
+   {v:pct+'%',l:'Percentage',c:pct>=60?'var(--grn)':'var(--red)'},
+   {v:`${ms}/10`,l:'Section A',c:'var(--f2)'},{v:`${bs}/5`,l:'Section B',c:'var(--f2)'},
+   {v:`${ss}/15`,l:'Section C',c:'var(--blu)'},{v:`${ls}/20`,l:'Section D',c:'var(--pur)'},
+   {v:xp,l:'XP Earned 🔥',c:'var(--f3)'}
+  ].forEach(c=>{
+    sg.innerHTML+=`<div class="sc-card${c.h?' hi':''}">
+      <div class="sv" style="color:${c.c}">${c.v}</div>
+      <div class="sl">${c.l}</div></div>`;
+  });
+
+  // MCQ Review
+  const rw=document.getElementById('review-wrap');rw.innerHTML='';
+  if(mcqDone){
+    let html='<div class="review-blk"><h3>📋 Section A — Review</h3>';
+    MCQ.forEach((q,i)=>{
+      const ok=mcqAnswers[i]===q.a;
+      html+=`<div class="rr"><span>${ok?'✅':'❌'}</span>
+        <span class="rr-q">Q${i+1}: ${q.q}</span>
+        <span class="rr-a ${ok?'rr-ok':'rr-bad'}">${['A','B','C','D'][mcqAnswers[i]||0]}: ${q.o[mcqAnswers[i]||0]}</span></div>`;
+    });
+    html+='</div>'; rw.innerHTML+=html;
+  }
+  showScreen('results');
+  document.getElementById('timer-box').style.display='none';
+}
+
+// ═══════════════════════════════════════════════
+//  SAVE / LOAD REPORTS (localStorage)
+// ═══════════════════════════════════════════════
+function saveReport(terminated){
+  if(!currentStudent)return;
+  const timeSpent=Math.round((Date.now()-testStartTime)/1000);
+  const reports=JSON.parse(localStorage.getItem('thulir_heat_reports')||'[]');
+  const report={
+    id:Date.now(),
+    name:currentStudent.name,
+    class:currentStudent.class,
+    timestamp:new Date().toISOString(),
+    timeSpent,
+    terminated,
+    scores:{mcq:calcMCQ(),blanks:calcBlanks(),sa:calcSA(),la:calcLA(),
+      total:calcMCQ()+calcBlanks()+calcSA()+calcLA()},
+    details:{
+      mcqAnswers:[...mcqAnswers],
+      blankAnswers:blankAnswers.map(a=>[...a]),
+      saAnswers:[...saAnswers],saScores:[...saScores],
+      laAnswers:[...laAnswers],laScores:[...laScores]
+    }
+  };
+  reports.push(report); localStorage.setItem('thulir_heat_reports',JSON.stringify(reports));
+}
+
+function getReports(){return JSON.parse(localStorage.getItem('thulir_heat_reports')||'[]');}
+
+// ═══════════════════════════════════════════════
+//  TEACHER DASHBOARD
+// ═══════════════════════════════════════════════
+function renderDash(){
+  const reports=getReports();
+  const nameF=document.getElementById('filter-name').value;
+  const statusF=document.getElementById('filter-status').value;
+  let filtered=reports;
+  if(nameF)filtered=filtered.filter(r=>r.name===nameF);
+  if(statusF==='complete')filtered=filtered.filter(r=>!r.terminated);
+  if(statusF==='terminated')filtered=filtered.filter(r=>r.terminated);
+  filtered.sort((a,b)=>b.id-a.id);
+
+  // Stats
+  const sg=document.getElementById('t-stats-grid');
+  const unique=[...new Set(reports.map(r=>r.name))].length;
+  const avg=reports.length?Math.round(reports.reduce((a,r)=>a+r.scores.total,0)/reports.length):0;
+  const topScore=reports.length?Math.max(...reports.map(r=>r.scores.total)):0;
+  sg.innerHTML=`
+    <div class="t-stat"><div class="v">${reports.length}</div><div class="l">Total Attempts</div></div>
+    <div class="t-stat"><div class="v">${unique}</div><div class="l">Unique Students</div></div>
+    <div class="t-stat"><div class="v">${avg}/50</div><div class="l">Average Score</div></div>
+    <div class="t-stat"><div class="v">${topScore}/50</div><div class="l">Top Score</div></div>
+    <div class="t-stat"><div class="v">${reports.filter(r=>r.terminated).length}</div><div class="l">Terminated</div></div>`;
+
+  const tbody=document.getElementById('t-tbody');
+  const np=document.getElementById('no-reports');
+  if(!filtered.length){tbody.innerHTML='';np.style.display='block';return;}
+  np.style.display='none';
+  tbody.innerHTML='';
+  filtered.forEach((r,i)=>{
+    const pct=Math.round((r.scores.total/50)*100);
+    const chip=pct>=70?'high':pct>=45?'mid':'low';
+    const dt=new Date(r.timestamp);
+    const dtStr=dt.toLocaleDateString('en-IN')+' '+dt.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+    const mins=Math.floor((r.timeSpent||0)/60),secs=(r.timeSpent||0)%60;
+    const tr=document.createElement('tr');
+    if(r.terminated)tr.classList.add('terminated');
+    tr.innerHTML=`
+      <td style="font-weight:800;color:#CFD8DC">${r.name}</td>
+      <td>${r.class||'—'}</td>
+      <td style="font-size:.8rem;color:#78909C">${dtStr}</td>
+      <td>${r.scores.mcq??'—'}/10</td>
+      <td>${r.scores.blanks??'—'}/5</td>
+      <td>${r.scores.sa??'—'}/15</td>
+      <td>${r.scores.la??'—'}/20</td>
+      <td><span class="score-chip ${chip}">${r.scores.total}/50 (${pct}%)</span></td>
+      <td>${r.terminated?'<span class="term-badge">TERMINATED</span>':'<span style="color:var(--grn);font-size:.8rem">✅ Done</span>'}</td>
+      <td><button class="detail-toggle" onclick="toggleDetail('det_${i}')">Details</button></td>`;
+    tbody.appendChild(tr);
+
+    // Detail row
+    const det=document.createElement('tr');
+    det.className='detail-row'; det.id=`det_${i}`;
+    let detHtml='<td colspan="10"><div class="detail-cell">';
+    detHtml+=`<div style="color:#78909C;font-size:.82rem;margin-bottom:10px">⏱ Time spent: ${mins}m ${secs}s</div>`;
+    detHtml+='<div class="detail-grid">';
+
+    // MCQ details
+    if(r.details.mcqAnswers){
+      const wrongMCQ=MCQ.filter((_,qi)=>r.details.mcqAnswers[qi]!==MCQ[qi].a);
+      if(wrongMCQ.length){
+        detHtml+='<div class="detail-item" style="grid-column:1/-1"><div class="di-label">❌ MCQ Mistakes</div>';
+        wrongMCQ.forEach((_,qi)=>{
+          const ri=MCQ.indexOf(_);
+          const ua=r.details.mcqAnswers[ri];
+          detHtml+=`<div class="di-ans" style="margin-bottom:4px">Q${ri+1}: ${MCQ[ri].q}<br>
+            <span style="color:var(--red)">Answered: ${ua!==null?MCQ[ri].o[ua]:'—'}</span> → 
+            <span style="color:var(--grn)">Correct: ${MCQ[ri].o[MCQ[ri].a]}</span></div>`;
+        });
+        detHtml+='</div>';
+      }
+    }
+
+    // Blank details
+    if(r.details.blankAnswers){
+      detHtml+='<div class="detail-item"><div class="di-label">📝 Fill in the Blanks</div>';
+      BLANKS.forEach((b,bi)=>{
+        const ans=(r.details.blankAnswers[bi]||[]).join(' / ')||'—';
+        detHtml+=`<div class="di-ans">B${bi+1}: <em>${ans}</em> → <span style="color:var(--f3)">${b.model.join(' / ')}</span></div>`;
+      });
+      detHtml+='</div>';
+    }
+
+    // SA details
+    if(r.details.saAnswers){
+      SA.forEach((s,si)=>{
+        const ans=r.details.saAnswers[si]||'Not answered';
+        const sc=r.details.saScores?r.details.saScores[si]:null;
+        detHtml+=`<div class="detail-item">
+          <div class="di-label">C${si+1}: ${s.q} <span class="di-score">${sc!==null?sc+'/'+s.marks:'AI not used'}</span></div>
+          <div class="di-ans">${ans}</div></div>`;
+      });
+    }
+
+    // LA details
+    if(r.details.laAnswers){
+      LA.forEach((la,li)=>{
+        const ans=r.details.laAnswers[li]||'Not answered';
+        const sc=r.details.laScores?r.details.laScores[li]:null;
+        detHtml+=`<div class="detail-item">
+          <div class="di-label">D${li+1}: ${la.q} <span class="di-score">${sc!==null?sc+'/'+la.marks:'AI not used'}</span></div>
+          <div class="di-ans">${ans}</div></div>`;
+      });
+    }
+
+    detHtml+='</div></div></td>';
+    det.innerHTML=detHtml;
+    tbody.appendChild(det);
+  });
+}
+function toggleDetail(id){
+  const el=document.getElementById(id);
+  if(el)el.classList.toggle('open');
+}
+
+// ═══════════════════════════════════════════════
+//  EXPORT CSV
+// ═══════════════════════════════════════════════
+function exportCSV(){
+  const reports=getReports();
+  if(!reports.length){showToast('No reports to export.');return;}
+  let csv='Name,Class,Date,MCQ/10,Blanks/5,SA/15,LA/20,Total/50,Percentage,Status,TimeSpent\n';
+  reports.forEach(r=>{
+    const pct=Math.round((r.scores.total/50)*100);
+    const mins=Math.floor((r.timeSpent||0)/60);
+    csv+=`"${r.name}","${r.class||''}","${new Date(r.timestamp).toLocaleString('en-IN')}",`+
+      `${r.scores.mcq??''},${r.scores.blanks??''},${r.scores.sa??''},`+
+      `${r.scores.la??''},${r.scores.total??''},${pct}%,`+
+      `${r.terminated?'Terminated':'Complete'},${mins}min\n`;
+  });
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download='thulir_heat_reports_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+}
+function clearReports(){
+  if(!confirm('Are you sure you want to delete ALL student reports? This cannot be undone.'))return;
+  localStorage.removeItem('thulir_heat_reports');
+  renderDash();
+  showToast('All reports cleared.');
+}
+
+// ═══════════════════════════════════════════════
+//  RESET
+// ═══════════════════════════════════════════════
+function resetAll(){
+  testActive=false;
+  clearInterval(timerInterval);
+  document.removeEventListener('visibilitychange',onVisChange);
+  window.removeEventListener('blur',onBlur);
+  mcqAnswers=new Array(10).fill(null);mcqDone=false;
+  blankAnswers=[["",""],[""],[""],[""],[""]];blanksDone=false;
+  saAnswers=new Array(5).fill('');saScores=new Array(5).fill(null);
+  laAnswers=new Array(4).fill('');laScores=new Array(4).fill(null);
+  xp=0;level=1;timerSec=90*60;timerStarted=false;warnCount=0;
+  wasTerminated=false;testStartTime=null;
+  document.getElementById('timer-box').textContent='1:30:00';
+  document.getElementById('timer-box').classList.remove('warn');
+  document.getElementById('timer-box').style.display='none';
+  document.getElementById('xp-fill').style.width='0%';
+  document.getElementById('xp-n').textContent='0';
+  document.getElementById('lvl-tag').textContent='Lv 1 Spark';
+  document.getElementById('hdr-student').style.display='none';
+  document.getElementById('hdr-badge').style.display='none';
+  document.getElementById('xp-strip').style.display='none';
+  document.getElementById('ov-warn').classList.remove('show');
+  document.getElementById('ov-term').classList.remove('show');
+  currentStudent=null;
+  document.getElementById('sel-name').value='';
+  document.getElementById('inp-class').value='';
+  showScreen('login');
+}
+</script>
+</body>
+</html>
